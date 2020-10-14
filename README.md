@@ -1,2 +1,2 @@
 # TableScanner
-Simple Android classes (with example activity) to find table on bitmap. Should/must be improved of course.
+Simple Android classes (with example activity) to find table cells on bitmap. Should/must be improved of course.
