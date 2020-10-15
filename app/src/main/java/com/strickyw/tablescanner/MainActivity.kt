@@ -4,11 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.strickyw.tablescanner.R
 import com.shockwave.pdfium.PdfiumCore
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.delay
@@ -23,19 +23,31 @@ class MainActivity : AppCompatActivity() {
 
     private val TAG = MainActivity::class.simpleName
 
+    private var bitmap: Bitmap? = null
     private var cells: List<Cell> = listOf()
     private var scale = 1f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        openPdf()
+        bitmap = openPdf()
+        scanButton.setOnClickListener {
+            bitmap?.let { bitmap ->
+                cells = Scanner(50).scan(
+                    bitmap,
+                    Point((0.5 * bitmap.width).toInt(), (0.5 * bitmap.height).toInt()),
+                    Scanner.Direction.TOP_BOTTOM,
+                    true,
+                    true
+                )
+            }
+        }
         imageView.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 cells.forEach {
                     val rect = Rect(it.topLeft.x, it.topLeft.y, it.bottomRight.x, it.bottomRight.y)
                     if (rect.contains((event.x / scale).toInt(), (event.y / scale).toInt())) {
-                        Toast.makeText(this, "Clicked: ${it.id}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Clicked cell: ${it.id}", Toast.LENGTH_SHORT).show()
                         return@forEach
                     }
                 }
@@ -44,7 +56,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun openPdf() {
+    fun openPdf(): Bitmap? {
+        var bitmap: Bitmap? = null
         try {
             val inputStream = assets.open("invoice.pdf")
             val bytes = ByteArray(inputStream.available())
@@ -60,15 +73,16 @@ class MainActivity : AppCompatActivity() {
 
             // ARGB_8888 - best quality, high memory usage, higher possibility of OutOfMemoryError
             // RGB_565 - little worse quality, twice less memory usage
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
             pdfiumCore.renderPageBitmap(pdfDocument, bitmap, pageNum, 0, 0, width, height)
 
-            cells = Scanner(50).scan(
-                    bitmap,
-                    Point((0.5 * bitmap.width).toInt(), (0.5 * bitmap.height).toInt()),
-                    Scanner.Direction.TOP_BOTTOM,
-                    true
-            )
+//            cells = Scanner(50).scan(
+//                bitmap,
+//                Point((0.5 * bitmap.width).toInt(), (0.5 * bitmap.height).toInt()),
+//                Scanner.Direction.TOP_BOTTOM,
+//                true,
+//                true
+//            )
             lifecycleScope.launch {
                 delay(500)
                 scale = max(imageView.width.toFloat() / bitmap.width, imageView.height.toFloat() / bitmap.height)
@@ -79,6 +93,6 @@ class MainActivity : AppCompatActivity() {
         } catch (ex: IOException) {
             ex.printStackTrace()
         }
-
+        return bitmap
     }
 }

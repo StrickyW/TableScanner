@@ -3,9 +3,9 @@ package com.strickyw.tablescanner
 import android.graphics.*
 import android.util.Log
 import androidx.annotation.ColorInt
-import kotlin.math.absoluteValue
 import com.strickyw.tablescanner.Scanner.Direction.*
 import com.strickyw.tablescanner.Scanner.Status.*
+import kotlin.math.absoluteValue
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -59,7 +59,7 @@ class Scanner(val colorTolerance: Int) {
         Log.v(TAG, "bg: (${Color.red(bgColor)}, ${Color.green(bgColor)}, ${Color.blue(bgColor)})")
         var canvas = Canvas(bitmap)
         canvas.drawCircle(start.x.toFloat(), start.y.toFloat(), 5F, Paint().apply {
-            color = Color.CYAN
+            color = Color.GREEN
             strokeWidth = 1F
         })
         val line = findLine(bitmap, bgColor, start, direction, scanWidth) // try to find line
@@ -100,10 +100,10 @@ class Scanner(val colorTolerance: Int) {
             Log.v(TAG, "Found vertices: ${processedVertices.size}")
             val cells = findCells(processedVertices)
             Log.v(TAG, "Found cells: ${cells.size}")
-            if (drawVertices)
-                drawVertices(canvas, processedVertices)
             if (drawCells)
                 drawCells(canvas, cells)
+            if (drawVertices)
+                drawVertices(canvas, processedVertices)
             return cells
         } else {
             return listOf()
@@ -122,8 +122,12 @@ class Scanner(val colorTolerance: Int) {
 
     private fun drawCells(canvas: Canvas, cells: List<Cell>) {
         val cellPaint = Paint().apply {
-            color = Color.GREEN
+            color = Color.parseColor("#008000")
             strokeWidth = 2F
+        }
+        val textPaint = Paint().apply {
+            color = Color.RED
+            textSize = 18f
         }
         cells.forEach {
             canvas.drawLine(
@@ -153,6 +157,12 @@ class Scanner(val colorTolerance: Int) {
                     it.topLeft.x.toFloat(),
                     it.topLeft.y.toFloat(),
                     cellPaint
+            )
+            canvas.drawText(
+                it.id.toString(),
+                (it.topLeft.x + it.topRight.x) / 2f,
+                (it.topLeft.y + it.bottomLeft.y) / 2f,
+                textPaint
             )
         }
     }
