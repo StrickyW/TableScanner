@@ -16,3 +16,7 @@ val cells: List<Cell> = scanner.scan(
                     drawVertices = true
                 )
 ```
+
+Result
+--------
+![Output sample](result.gif)
