@@ -24,4 +24,5 @@ Result
 TODO
 --------
 Consider possible table rotation.
+
 Find tables without setting a start point.
