@@ -20,3 +20,8 @@ val cells: List<Cell> = scanner.scan(
 Result
 --------
 ![Output sample](result.gif)
+
+TODO
+--------
+Consider possible table rotation.
+Find tables without setting a start point.
